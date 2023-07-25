@@ -44,5 +44,5 @@ int main()
     Test(state_3x3_18moves);
 
 	system("pause");
-    return 0;
+    
 }
