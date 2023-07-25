@@ -24,16 +24,21 @@ public:
 		std::queue<Node> openSet;
         openSet.push({ initialState, {} });
 
+        auto stateCompare = [](const State_t& first, const State_t& second) -> bool
+        {
+            return first.GetData() < second.GetData();
+        };
+
 		//TODO: define CLOSED SET correctly
-		std::set<State_t> closedSet;
-		//std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
+		//std::set<State_t> closedSet;
+		std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
 
         // TODO: Create a comparator so std::set can work with the State instances.
         // It doesn't really make sense to compare states otherwise...
-        //auto stateCompare = [](const State_t& first, const State_t& second) -> bool
-        //{
-        //    return first.GetData() < second.GetData();
-        //};
+        /*auto stateCompare = [](const State_t& first, const State_t& second) -> bool
+        {
+            return first.GetData() < second.GetData();
+        };*/
 
         while (!openSet.empty())
         {

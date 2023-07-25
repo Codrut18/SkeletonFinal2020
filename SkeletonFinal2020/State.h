@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
+#include <set>
 
 template<size_t N = 3>
 class State
@@ -16,7 +17,7 @@ class State
 public: // Types
     using Position2D = std::pair<size_t, size_t>;
     using ElementType = uint8_t;
-	using Data = std::vector<ElementType>; // TODO
+	using Data = std::array<ElementType, N*N>;
 
 private: // members
     Data m_data;
@@ -24,7 +25,7 @@ private: // members
 public:
     static const size_t Dimension = N;    
 
-	State() {} // TODO
+    State() = delete; // TODO
     State(Data data) : m_data{ std::move(data) } {};
 
     const Data& GetData() const
@@ -36,10 +37,7 @@ public:
     {
         // TODO: Refactor with STL        
         Data goalData;         
-        for (auto idx = 0u; idx < goalData.size(); ++idx)
-        {
-            goalData[idx] = idx+1;
-        }
+        std::iota(goalData.begin(), goalData.end(), 1);
         goalData.back() = 0;        
         return State(goalData);
     }
@@ -56,34 +54,18 @@ public:
 		// pieces 1 - 8 
 		// empty space 0 present
 
-        Data sortedData;
-        
-        for (auto idx = 0u; idx < m_data.size(); ++idx)
-        {
-            sortedData[idx] = m_data[idx];
-        }
+        return std::is_permutation(m_data.begin(), m_data.end(), GoalState().GetData().begin());
 
-        for (auto idxI = 0u; idxI < sortedData.size() - 1 ; ++idxI)
-        {
-			for (auto idxJ = 0u; idxJ < sortedData.size() - idxI - 1 ; ++idxJ)
-			{
-				if (sortedData[idxJ] >  sortedData[idxJ + 1])
-				{
-					auto temp = sortedData[idxJ];
-					sortedData[idxJ] = sortedData[idxJ + 1];
-					sortedData[idxJ + 1] = temp;
-				}
-			}
-        } 
+        /*Data sortedData;
+        
+        sortedData = GetData();
+
+        std::sort(sortedData.begin(), sortedData.end());
 
         Data validSortedData;
-        
-        for (auto idx = 0u; idx < validSortedData.size(); ++idx)
-        {
-            validSortedData[idx] = idx;
-        }
+        std::iota(validSortedData.begin(), validSortedData.end(), 0);
 
-        return sortedData == validSortedData;
+        return sortedData == validSortedData;*/
     }
 
     bool IsSolvable() const
