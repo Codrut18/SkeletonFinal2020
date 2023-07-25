@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <set>
+#include <unordered_map>
 
 template<size_t N = 3>
 class State
@@ -54,7 +55,8 @@ public:
 		// pieces 1 - 8 
 		// empty space 0 present
 
-        return std::is_permutation(m_data.begin(), m_data.end(), GoalState().GetData().begin());
+        //return std::is_permutation(m_data.begin(), m_data.end(), GoalState().GetData().begin());
+        return std::ranges::is_permutation(m_data, GoalState().GetData());
 
         /*Data sortedData;
         
@@ -68,23 +70,24 @@ public:
         return sortedData == validSortedData;*/
     }
 
+    size_t CountInversions(typename Data::const_iterator begin, typename Data::const_iterator end) const
+    {
+        size_t acc{ 0u };
+        for (auto it = begin; it != end; ++it)
+        {
+            auto&& current = *it;
+            if (current != 0)
+                acc += std::count_if(it, end, [current](auto next) { return next != 0 && next < current; });
+        }
+
+        return acc;
+    }
+
     bool IsSolvable() const
     {
 		// TODO too big lambda
-        auto countInversions = [](auto begin, auto end)
-        {
-            size_t acc{ 0u };
-            for (auto it = begin; it != end; ++it)
-            {
-                auto&& current = *it;
-                if (current != 0)
-                    acc += std::count_if(it, end, [current](auto next) { return next != 0 && next < current; });
-            }
 
-            return acc;
-        };
-
-        const auto inversionsCount = countInversions(m_data.begin(), m_data.end());
+        const auto inversionsCount = CountInversions(m_data.begin(), m_data.end());
         const auto isInversionCountEven = inversionsCount % 2 == 0;
         const bool isNOdd = N % 2 == 1;
         const bool isBlankRowEven = GetBlankPosition2D().first % 2 == 0;
@@ -97,17 +100,17 @@ public:
     std::vector<std::pair<State, MoveDirection>> GetChildren() const
     {
         //TODO: Refactor this method + See Move method and refactor the Move method
-        auto child1 = MoveLeft();
-        auto child2 = MoveRight();
-        auto child3 = MoveUp();
-        auto child4 = MoveDown();
 
         std::vector<std::pair<State, MoveDirection>> children;
-        if (child1) children.emplace_back(*child1, MoveDirection::LEFT);
-        if (child2) children.emplace_back(*child2, MoveDirection::RIGHT);
-        if (child3) children.emplace_back(*child3, MoveDirection::UP);
-        if (child4) children.emplace_back(*child4, MoveDirection::DOWN);
-        
+
+        static Moves moves = { MoveDirection::UP, MoveDirection::DOWN, MoveDirection::LEFT, MoveDirection::RIGHT };
+
+        for (auto direction : moves)
+        {
+            auto state = Move(direction);
+            if (state) children.emplace_back(std::make_pair(*state, direction));
+        }
+
         return children;
     }
 
@@ -116,11 +119,16 @@ private: // methods
     size_t GetBlankPosition() const
     {
         // TODO refactor using STL algo
-        for (auto idx = 0u; idx < m_data.size(); ++idx)
+        /*for (auto idx = 0u; idx < m_data.size(); ++idx)
         {
             if (m_data[idx] == 0)
                 return idx;
-        }
+        }*/
+        const auto& it = std::find(m_data.begin(), m_data.end(), 0);
+
+        if (it != m_data.end())
+            return std::distance(m_data.begin(), it);
+
         throw std::runtime_error("Unexpected");
     }
 
@@ -133,14 +141,17 @@ private: // methods
     // TODO: Perform the move if possible and return the state. Returns std::nullopt otherwise.
     std::optional<State> Move(MoveDirection direction) const
     {
-        switch (direction)
-        {
-        case MoveDirection::LEFT:   return MoveLeft();
-        case MoveDirection::UP:     return MoveUp();
-        case MoveDirection::RIGHT:  return MoveRight();
-        case MoveDirection::DOWN:   return MoveDown();
-        default:                    throw std::runtime_error("Not implemented.");
-        }
+        static std::unordered_map<MoveDirection, std::function<std::optional<State>(const State&)>> moveAction = {
+            {MoveDirection::LEFT,   std::mem_fn(&State::MoveLeft)},
+            {MoveDirection::UP,     std::mem_fn(&State::MoveUp)},
+            {MoveDirection::RIGHT,  std::mem_fn(&State::MoveRight)},
+            {MoveDirection::DOWN,   std::mem_fn(&State::MoveDown)}
+        };
+
+        auto state = moveAction.find(direction);
+        if(state == moveAction.end())
+            throw std::runtime_error("Not implemented.");
+        return state->second(*this);
     }
 
     static State SwapTiles(const State& state, size_t firstPos, size_t secondPos)

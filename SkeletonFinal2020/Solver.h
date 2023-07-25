@@ -44,8 +44,7 @@ public:
         {
 			// TODO: Do it nicer , who is first? second? structure binding
             auto currentNode = openSet.front();            
-            auto&& currentState = currentNode.first;
-            auto&& currentMoves = currentNode.second;
+            auto&& [currentState, currentMoves] = currentNode;
             openSet.pop();
 
             // some logging
@@ -68,10 +67,9 @@ public:
             for (auto&& childMovePair : currentState.GetChildren())
             {
 				//TODO: Do it nicer - who is first? second? 
-                auto&& childState = childMovePair.first;
-                MoveDirection move = childMovePair.second;
+                auto&& [childState, move] = childMovePair;
 
-				if(closedSet.find( childState) == closedSet.end()) // TODO: use C++20
+				if(!closedSet.contains( childState)) // TODO: use C++20
                 {
                     Moves childMoves = currentMoves;
                     childMoves.push_back(move);
@@ -88,6 +86,15 @@ private:
     template <class State_t>
     static void Validate(const State_t& state)
     {
+        if (!state.IsValid())
+        {
+            throw std::runtime_error("state not valid");
+        }
+        if (!state.IsSolvable())
+        {
+            throw std::runtime_error("state not solvable");
+        }
+
 		return;
     }
 };

@@ -16,10 +16,16 @@ static void Test(const State<N>& initialState)
 
         std::cout << "Found solution in " << result.size() << " moves:" << std::endl;
         // TODO 
-		for (auto it = result.begin(); it != result.end(); it++)
+
+        //std::copy(result.begin(), result.end(), std::ostream_iterator<MoveDirection>(std::cout, " "));
+        std::ranges::copy(result, std::ostream_iterator<MoveDirection>(std::cout, " "));
+
+		/*for (auto it = result.begin(); it != result.end(); it++)
         {
             std::cout << *it << " ";
-        }        
+        } */       
+
+
 
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
