@@ -121,6 +121,7 @@
     <ClCompile Include="NPuzzleDay2cpp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Heuristics.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="types.h" />

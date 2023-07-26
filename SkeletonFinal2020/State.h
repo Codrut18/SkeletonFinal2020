@@ -138,10 +138,13 @@ private: // methods
         throw std::runtime_error("Unexpected");
     }
 
-    Position2D GetPosition2D(size_t position) const
+public:
+    static Position2D GetPosition2D(size_t position)
     {
         return { position / N, position % N };
     }
+
+private:
 
     Position2D GetBlankPosition2D() const
     {

@@ -2,6 +2,7 @@
 
 #include "State.h"
 #include "io.h"
+#include "Heuristics.h"
 
 #include <iostream>
 #include <set>
@@ -21,10 +22,20 @@ public:
 
         using Node = std::pair<State_t, Moves>;
 
+        /*auto nodeGreaterComparer = [](const Node& first, const Node& second)
+        {
+            return Heuristics::GetManhattanDistance(first.first) + first.second.size() > Heuristics::GetManhattanDistance(second.first) + second.second.size();
+        };*/
+
         auto nodeGreaterComparer = [](const Node& first, const Node& second)
         {
-            return first.first.GetManhattanDistance() + first.second.size() > second.first.GetManhattanDistance() + second.second.size();
+            return Heuristics::GetManhattanDistanceWithLinearConflict(first.first) + first.second.size() > Heuristics::GetManhattanDistanceWithLinearConflict(second.first) + second.second.size();
         };
+
+        /*auto nodeGreaterComparer = [](const Node& first, const Node& second)
+        {
+            return Heuristics::GetManhattanDistanceWithLinearConflict(first.first) > Heuristics::GetManhattanDistanceWithLinearConflict(second.first);
+        };*/
 
 		//TODO: define OPEN SET correctly
 		std::priority_queue<Node, std::vector<Node>, decltype(nodeGreaterComparer)> openSet(nodeGreaterComparer);
@@ -34,37 +45,8 @@ public:
         {
             return first.GetData() < second.GetData();
         };
-
-		//TODO: define CLOSED SET correctly
-		//std::set<State_t> closedSet;
-
-        /*auto stateHasher = [](const State_t& state)
-        {
-            static const std::hash<State_t::ElementType> hasher;
-            size_t seed = 0u;
-            for (auto& elem : state.GetData())
-            {
-                seed ^= hasher(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            }
-
-            return seed;
-        };
-
-        auto stateCompareEqual = [](const State_t& first, const State_t& second) -> bool
-        {
-            return first.GetData() == second.GetData();
-        };*/
-
-		//std::unordered_set<State_t, decltype(stateHasher), decltype(stateCompareEqual)> closedSet(8u,stateHasher,stateCompareEqual);
 		
         std::unordered_set<State_t> closedSet;
-
-        // TODO: Create a comparator so std::set can work with the State instances.
-        // It doesn't really make sense to compare states otherwise...
-        /*auto stateCompare = [](const State_t& first, const State_t& second) -> bool
-        {
-            return first.GetData() < second.GetData();
-        };*/
 
         while (!openSet.empty())
         {
@@ -108,7 +90,6 @@ public:
     }
 
 private:
-	//musthaveTODO implement Validate correctly
     template <class State_t>
     static void Validate(const State_t& state)
     {
