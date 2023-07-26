@@ -21,8 +21,13 @@ public:
 
         using Node = std::pair<State_t, Moves>;
 
+        auto nodeGreaterComparer = [](const Node& first, const Node& second)
+        {
+            return first.first > second.first;
+        };
+
 		//TODO: define OPEN SET correctly
-		std::queue<Node> openSet;
+		std::priority_queue<Node, std::vector<Node>, decltype(nodeGreaterComparer)> openSet(nodeGreaterComparer);
         openSet.push({ initialState, {} });
 
         auto stateCompare = [](const State_t& first, const State_t& second) -> bool
@@ -64,7 +69,7 @@ public:
         while (!openSet.empty())
         {
 			// TODO: Do it nicer , who is first? second? structure binding
-            auto currentNode = openSet.front();            
+            auto currentNode = openSet.top();            
             auto&& [currentState, currentMoves] = currentNode;
             openSet.pop();
 

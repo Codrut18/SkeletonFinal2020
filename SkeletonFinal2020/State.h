@@ -11,6 +11,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_map>
+#include <cmath>
 
 template<size_t N = 3>
 class State
@@ -119,17 +120,16 @@ public:
         return m_data == other.m_data;
     }
 
+    bool operator>(const State& other) const
+    {
+        return GetManhattanDistance() > other.GetManhattanDistance();
+    }
+
 private: // methods
 
     size_t GetBlankPosition() const
     {
-        // TODO refactor using STL algo
-        /*for (auto idx = 0u; idx < m_data.size(); ++idx)
-        {
-            if (m_data[idx] == 0)
-                return idx;
-        }*/
-        const auto& it = std::find(m_data.begin(), m_data.end(), 0);
+        const auto& it = std::ranges::find(m_data,0);
 
         if (it != m_data.end())
             return std::distance(m_data.begin(), it);
@@ -137,11 +137,16 @@ private: // methods
         throw std::runtime_error("Unexpected");
     }
 
+    Position2D GetPosition2D(size_t position) const
+    {
+        return { position / N, position % N };
+    }
+
     Position2D GetBlankPosition2D() const
     {
-        auto&& absolute = GetBlankPosition();
-        return { absolute / N, absolute % N }; // structure binding instead of std::make_pair<>
+        return GetPosition2D(GetBlankPosition());
     }
+
 
     // TODO: Perform the move if possible and return the state. Returns std::nullopt otherwise.
     std::optional<State> Move(MoveDirection direction) const
@@ -196,6 +201,17 @@ private: // methods
 
         auto blankPosition = GetBlankPosition();
         return SwapTiles(*this, blankPosition, blankPosition + N);
+    }
+
+    size_t GetManhattanDistance() const
+    {
+        size_t totalDistance = 0u;
+        for (auto it = m_data.begin(); it != m_data.end(); it++)
+        {
+            auto&& [line,column] = GetPosition2D(std::distance(m_data.begin(), it));
+            totalDistance += std::abs((int)((*it-1) / N - line)) + std::abs((int)((*it-1) % N - column));
+        }
+        return totalDistance;
     }
 
 };
