@@ -21,6 +21,7 @@ public: // Types
     using ElementType = uint8_t;
 	using Data = std::array<ElementType, N*N>;
 
+
 private: // members
     Data m_data;
 
@@ -203,11 +204,14 @@ private: // methods
         return SwapTiles(*this, blankPosition, blankPosition + N);
     }
 
+public:
     size_t GetManhattanDistance() const
     {
         size_t totalDistance = 0u;
         for (auto it = m_data.begin(); it != m_data.end(); it++)
         {
+            if (*it == 0)
+                continue;
             auto&& [line,column] = GetPosition2D(std::distance(m_data.begin(), it));
             totalDistance += std::abs((int)((*it-1) / N - line)) + std::abs((int)((*it-1) % N - column));
         }

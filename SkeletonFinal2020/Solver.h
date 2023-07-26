@@ -23,7 +23,7 @@ public:
 
         auto nodeGreaterComparer = [](const Node& first, const Node& second)
         {
-            return first.first > second.first;
+            return first.first.GetManhattanDistance() + first.second.size() > second.first.GetManhattanDistance() + second.second.size();
         };
 
 		//TODO: define OPEN SET correctly
