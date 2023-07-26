@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <set>
+#include <unordered_set>
 #include <queue>
 
 class Solver
@@ -31,7 +32,27 @@ public:
 
 		//TODO: define CLOSED SET correctly
 		//std::set<State_t> closedSet;
-		std::set<State_t, decltype(stateCompare)> closedSet(stateCompare);
+
+        /*auto stateHasher = [](const State_t& state)
+        {
+            static const std::hash<State_t::ElementType> hasher;
+            size_t seed = 0u;
+            for (auto& elem : state.GetData())
+            {
+                seed ^= hasher(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            }
+
+            return seed;
+        };
+
+        auto stateCompareEqual = [](const State_t& first, const State_t& second) -> bool
+        {
+            return first.GetData() == second.GetData();
+        };*/
+
+		//std::unordered_set<State_t, decltype(stateHasher), decltype(stateCompareEqual)> closedSet(8u,stateHasher,stateCompareEqual);
+		
+        std::unordered_set<State_t> closedSet;
 
         // TODO: Create a comparator so std::set can work with the State instances.
         // It doesn't really make sense to compare states otherwise...

@@ -114,6 +114,11 @@ public:
         return children;
     }
 
+    bool operator==(const State& other) const
+    {
+        return m_data == other.m_data;
+    }
+
 private: // methods
 
     size_t GetBlankPosition() const
@@ -226,3 +231,22 @@ std::ostream& operator<< (std::ostream& os, const State<N>& state)
 
 using State3X3 = State<3>;
 using State4X4 = State<4>;
+
+namespace std {
+
+    template<size_t N>
+    struct hash<State<N>>
+    {
+        size_t operator() (const State<N>& state) const
+        {
+            static const std::hash<State<N>::ElementType> hasher;
+            size_t seed = 0u;
+            for (auto& elem : state.GetData())
+            {
+                seed ^= hasher(elem) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            }
+
+            return seed;
+        }
+    };
+}
